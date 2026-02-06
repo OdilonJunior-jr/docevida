@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Doce Vida Doce | Cardápio Real</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { purple: '#4c1d95', light: '#a78bfa', accent: '#fbbf24', dark: '#1e1b4b' }
+          },
+          fontFamily: { sans: ['Roboto', 'sans-serif'], display: ['Poppins', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;900&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body { background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; min-height: 100vh; margin: 0; }
+    #app-container { width: 100%; max-width: 450px; background-color: #1e1b4b; position: relative; min-height: 100vh; overflow-x: hidden; display: flex; flex-direction: column; }
+    .bg-hero { background-image: linear-gradient(to bottom, rgba(30, 27, 75, 0.2), rgba(30, 27, 75, 1)), url('açai.jpg'); background-size: cover; background-position: center; }
+    .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .glass-strong { background: rgba(30, 27, 75, 0.9); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+    .input-boss { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 14px; width: 100%; color: white; outline: none; font-size: 14px; }
+    .section { display: none; animation: fadeIn 0.4s ease-out; }
+    .section.active { display: block; }
+    .flex-section.active { display: flex; flex-direction: column; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .toggle-btn { opacity: 0.6; filter: grayscale(1); transition: all 0.3s; }
+    .toggle-btn.selected { opacity: 1; filter: grayscale(0); background: rgba(167, 139, 250, 0.15); border: 1px solid #a78bfa; }
+  </style>
+</head>
+<body>
+
+<div id="app-container">
+  <section id="home-screen" class="section flex-section active bg-hero h-screen relative p-6 justify-end pb-16">
+    <div class="relative z-10">
+      <h1 class="text-5xl font-black text-white leading-[0.9] mb-3">DOCE<br><span class="text-brand-light">VIDA</span><br>DOCE</h1>
+      <p class="text-slate-200 text-sm font-light mb-8">Açaí Premium na Garrafa (300ml). Escolha seu sabor favorito!</p>
+      <button onclick="showSection('catalog-screen')" class="w-full bg-brand-purple text-white font-bold py-4 rounded-2xl shadow-xl flex items-center justify-center gap-3 active:scale-95 transition">
+        FAZER PEDIDO <i class="fas fa-shopping-cart"></i>
+      </button>
+    </div>
+  </section>
+
+  <nav id="top-nav" class="fixed top-0 w-full max-w-[450px] z-50 glass-strong px-5 py-3 flex justify-between items-center hidden">
+    <button onclick="goBack()" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-slate-300"><i class="fas fa-chevron-left"></i></button>
+    <span class="font-bold text-sm text-brand-light">CARDÁPIO 300ml</span>
+    <div class="w-10 h-10 flex items-center justify-center relative" onclick="showSection('cart-screen')">
+      <i class="fas fa-shopping-bag text-slate-200"></i>
+      <span id="nav-badge" class="absolute top-1 right-1 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold opacity-0">0</span>
+    </div>
+  </nav>
+
+  <main id="catalog-screen" class="section pt-20 px-5 pb-32">
+    <div class="bg-gradient-to-r from-brand-accent to-orange-500 rounded-2xl p-4 mb-6 text-brand-dark font-bold text-sm">
+      🚀 ENTREGA GRÁTIS a partir de 3 unidades!
+    </div>
+    <div id="product-list" class="space-y-4"></div>
+  </main>
+
+  <section id="cart-screen" class="section pt-20 px-5 pb-32">
+    <h2 class="text-2xl font-black mb-6">Finalizar Pedido</h2>
+    <div id="cart-items" class="space-y-3 mb-6"></div>
+    <div id="empty-cart-msg" class="hidden text-center py-10 text-slate-500">Sacola vazia.</div>
+
+    <div id="checkout-form" class="hidden">
+      <div class="mb-4"><input type="text" id="cust-name" class="input-boss" placeholder="Seu Nome"></div>
+      <div class="mb-4">
+        <textarea id="obs" placeholder="Observações (Ex: sem açúcar, mais paçoca...)" class="input-boss h-20"></textarea>
+      </div>
+      
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <button onclick="setMode('Entrega')" id="btn-entrega" class="toggle-btn selected glass p-3 rounded-xl text-xs font-bold">ENTREGA</button>
+        <button onclick="setMode('Retirada')" id="btn-retirada" class="toggle-btn glass p-3 rounded-xl text-xs font-bold">RETIRADA</button>
+      </div>
+
+      <div id="address-box" class="space-y-3 mb-6">
+        <input type="text" id="street" class="input-boss" placeholder="Rua e Número">
+        <input type="text" id="district" class="input-boss" placeholder="Bairro">
+      </div>
+
+      <select id="payment" class="input-boss mb-6 bg-brand-dark">
+        <option value="Pix">Pix</option>
+        <option value="Dinheiro">Dinheiro</option>
+        <option value="Cartão">Cartão</option>
+      </select>
+
+      <div class="glass p-5 rounded-2xl mb-6">
+        <div class="flex justify-between text-sm mb-2"><span>Subtotal</span><span id="sub-val">R$ 0,00</span></div>
+        <div class="flex justify-between text-sm mb-2 text-green-400"><span>Entrega</span><span id="del-val">R$ 0,00</span></div>
+        <div class="flex justify-between font-black text-xl border-t border-white/10 pt-3"><span>TOTAL</span><span id="total-val">R$ 0,00</span></div>
+      </div>
+
+      <button onclick="sendOrder()" class="w-full bg-green-500 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2">
+        <i class="fab fa-whatsapp text-xl"></i> ENVIAR NO WHATSAPP
+      </button>
+    </div>
+  </section>
+
+  <div id="bottom-bar" class="fixed bottom-6 left-6 right-6 max-w-[402px] mx-auto glass-strong p-3 rounded-2xl z-50 flex justify-between items-center hidden border border-brand-purple/50">
+    <div>
+      <p class="text-[10px] uppercase text-slate-400 font-bold">Total</p>
+      <p id="float-total" class="font-black text-white">R$ 0,00</p>
+    </div>
+    <button onclick="showSection('cart-screen')" class="bg-white text-brand-dark px-6 py-2 rounded-xl font-bold text-xs uppercase">Ver Sacola</button>
+  </div>
+</div>
+
+<script>
+  // CARDÁPIO ATUALIZADO
+  const products = [
+    { id: 1, name: "Açaí Tradicional", price: 13.00, desc: "Açaí puro e cremoso na garrafa." },
+    { id: 2, name: "Açaí com Morango", price: 15.00, desc: "Batido com pedaços de morango fresco." },
+    { id: 3, name: "Açaí com Banana", price: 15.00, desc: "Batido com banana, energia pura." },
+    { id: 4, name: "Açaí com Leite Ninho", price: 16.00, desc: "Muito Leite Ninho para maior cremosidade." },
+    { id: 5, name: "Açaí com Nutella", price: 18.00, desc: "A combinação perfeita com Nutella original." }
+  ];
+
+  let cart = [];
+  let deliveryMode = "Entrega";
+
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.getElementById('top-nav').classList.toggle('hidden', id === 'home-screen');
+    if(id === 'catalog-screen') renderProducts();
+    if(id === 'cart-screen') renderCart();
+    updateUI();
+  }
+
+  function goBack() { showSection('home-screen'); }
+
+  function renderProducts() {
+    document.getElementById('product-list').innerHTML = products.map(p => `
+      <div class="glass p-3 rounded-2xl flex items-center gap-4 border border-white/5">
+        <div class="w-16 h-16 bg-brand-purple/40 rounded-xl flex-shrink-0 overflow-hidden">
+          <img src="açai.jpg" class="w-full h-full object-cover opacity-80">
+        </div>
+        <div class="flex-1">
+          <h4 class="font-bold text-white text-sm">${p.name}</h4>
+          <p class="text-[10px] text-slate-400 leading-tight">${p.desc}</p>
+          <div class="flex justify-between items-end mt-1">
+            <span class="text-brand-accent font-black">R$ ${p.price.toFixed(2)}</span>
+            <button onclick="add(${p.id})" class="bg-white text-brand-dark w-8 h-8 rounded-full flex items-center justify-center shadow-lg active:scale-90"><i class="fas fa-plus text-xs"></i></button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function add(id) {
+    const p = products.find(x => x.id === id);
+    const item = cart.find(x => x.id === id);
+    if(item) item.qty++; else cart.push({...p, qty: 1});
+    updateUI();
+  }
+
+  function updateUI() {
+    const qty = cart.reduce((acc, i) => acc + i.qty, 0);
+    const total = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
+    document.getElementById('nav-badge').innerText = qty;
+    document.getElementById('nav-badge').style.opacity = qty > 0 ? '1' : '0';
+    document.getElementById('float-total').innerText = "R$ " + total.toFixed(2);
+    document.getElementById('bottom-bar').classList.toggle('hidden', qty === 0 || document.getElementById('home-screen').classList.contains('active'));
+  }
+
+  function renderCart() {
+    const container = document.getElementById('cart-items');
+    if(cart.length === 0) {
+      container.innerHTML = '';
+      document.getElementById('checkout-form').classList.add('hidden');
+      document.getElementById('empty-cart-msg').classList.remove('hidden');
+      return;
+    }
+    document.getElementById('empty-cart-msg').classList.add('hidden');
+    document.getElementById('checkout-form').classList.remove('hidden');
+    container.innerHTML = cart.map(i => `
+      <div class="glass p-3 rounded-xl flex justify-between items-center">
+        <div><p class="font-bold text-sm">${i.name}</p><p class="text-brand-accent text-xs">R$ ${(i.price * i.qty).toFixed(2)}</p></div>
+        <div class="flex items-center gap-3 bg-black/30 p-1 rounded-lg">
+          <button onclick="changeQty(${i.id}, -1)" class="px-2 text-slate-400">-</button>
+          <span class="text-xs font-bold">${i.qty}</span>
+          <button onclick="changeQty(${i.id}, 1)" class="px-2 text-brand-light">+</button>
+        </div>
+      </div>
+    `).join('');
+    calculateTotals();
+  }
+
+  function changeQty(id, delta) {
+    const i = cart.find(x => x.id === id);
+    if(i) { i.qty += delta; if(i.qty <= 0) cart = cart.filter(x => x.id !== id); }
+    renderCart();
+    updateUI();
+  }
+
+  function setMode(m) {
+    deliveryMode = m;
+    document.getElementById('btn-entrega').classList.toggle('selected', m === 'Entrega');
+    document.getElementById('btn-retirada').classList.toggle('selected', m === 'Retirada');
+    document.getElementById('address-box').classList.toggle('hidden', m === 'Retirada');
+    calculateTotals();
+  }
+
+  function calculateTotals() {
+    const sub = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
+    const qty = cart.reduce((acc, i) => acc + i.qty, 0);
+    const delivery = (deliveryMode === "Entrega" && qty < 3) ? 5.00 : 0;
+    document.getElementById('sub-val').innerText = "R$ " + sub.toFixed(2);
+    document.getElementById('del-val').innerText = delivery === 0 ? "GRÁTIS" : "R$ 5,00";
+    document.getElementById('total-val').innerText = "R$ " + (sub + delivery).toFixed(2);
+  }
+
+  function sendOrder() {
+    const name = document.getElementById('cust-name').value;
+    if(!name) return alert("Digite seu nome!");
+    let msg = `*🍇 PEDIDO - DOCE VIDA DOCE*%0A*Cliente:* ${name}%0A%0A*ITENS:*%0A`;
+    cart.forEach(i => msg += `${i.qty}x ${i.name}%0A`);
+    msg += `%0A*TOTAL:* ${document.getElementById('total-val').innerText}%0A*Pagamento:* ${document.getElementById('payment').value}%0A*Modo:* ${deliveryMode}`;
+    if(deliveryMode === "Entrega") msg += `%0A*Endereço:* ${document.getElementById('street').value}, ${document.getElementById('district').value}`;
+    window.open(`https://wa.me/5500000000000?text=${msg}`);
+  }
+</script>
+</body>
+</html>
